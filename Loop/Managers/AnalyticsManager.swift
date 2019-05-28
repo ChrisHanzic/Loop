@@ -5,10 +5,12 @@
 //  Created by Nathan Racklyeft on 4/28/16.
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
+//  Fat-Protein Unit code by Robert Silvers, 10/2018.
 
 import Foundation
 import Amplitude
 import LoopKit
+import LoopCore
 
 
 final class AnalyticsManager: IdentifiableClass {
@@ -110,20 +112,28 @@ final class AnalyticsManager: IdentifiableClass {
         if newValue.suspendThreshold != oldValue.suspendThreshold {
             logEvent("Minimum BG Guard change")
         }
+        
+        if newValue.fpuRatio != oldValue.fpuRatio {
+            logEvent("FPU Ratio change")
+        }
+        
+        if newValue.fpuDelay != oldValue.fpuDelay {
+            logEvent("FPU Delay change")
+        }
 
         if newValue.dosingEnabled != oldValue.dosingEnabled {
             logEvent("Closed loop enabled change")
         }
-
-        if newValue.retrospectiveCorrectionEnabled != oldValue.retrospectiveCorrectionEnabled {
-            logEvent("Retrospective correction enabled change")
+        
+        if newValue.integralRetrospectiveCorrectionEnabled != oldValue.integralRetrospectiveCorrectionEnabled {
+            logEvent("Integral retrospective correction enabled change")
         }
 
         if newValue.glucoseTargetRangeSchedule != oldValue.glucoseTargetRangeSchedule {
             if newValue.glucoseTargetRangeSchedule?.timeZone != oldValue.glucoseTargetRangeSchedule?.timeZone {
                 self.punpTimeZoneDidChange()
-            } else if newValue.glucoseTargetRangeSchedule?.override != oldValue.glucoseTargetRangeSchedule?.override {
-                logEvent("Glucose target range override change", outOfSession: true)
+            } else if newValue.scheduleOverride != oldValue.scheduleOverride {
+                logEvent("Temporary schedule override change", outOfSession: true)
             } else {
                 logEvent("Glucose target range change")
             }
@@ -133,7 +143,7 @@ final class AnalyticsManager: IdentifiableClass {
 
     // MARK: - Loop Events
 
-    func didAddCarbsFromWatch(_ carbs: Double) {
+    func didAddCarbsFromWatch() {
         logEvent("Carb entry created", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 
